@@ -13,6 +13,10 @@ const productSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+
+  image: {
+    type: String,
+  },
 });
 
 export default mongoose.model("Product", productSchema);

@@ -9,6 +9,7 @@ export async function createProduct(req, res) {
       name,
       price,
       description,
+      image: req.file ? `/uploads/products/${req.file.filename}` : undefined,
     });
 
     return res.status(201).json(product);
@@ -28,7 +29,56 @@ export async function createProduct(req, res) {
 // GET ALL
 export async function getProducts(req, res) {
   try {
-    const products = await Product.find();
+    const { name, minPrice, maxPrice } = req.query;
+    const filter = {};
+
+    if (name) {
+      const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.name = {
+        $regex: escapedName,
+        $options: "i",
+      };
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filter.price = {};
+
+      if (minPrice !== undefined) {
+        const parsedMinPrice = Number(minPrice);
+
+        if (!Number.isFinite(parsedMinPrice)) {
+          return res.status(400).json({
+            message: "minPrice son bo'lishi kerak",
+          });
+        }
+
+        filter.price.$gte = parsedMinPrice;
+      }
+
+      if (maxPrice !== undefined) {
+        const parsedMaxPrice = Number(maxPrice);
+
+        if (!Number.isFinite(parsedMaxPrice)) {
+          return res.status(400).json({
+            message: "maxPrice son bo'lishi kerak",
+          });
+        }
+
+        filter.price.$lte = parsedMaxPrice;
+      }
+
+      if (
+        filter.price.$gte !== undefined &&
+        filter.price.$lte !== undefined &&
+        filter.price.$gte > filter.price.$lte
+      ) {
+        return res.status(400).json({
+          message: "minPrice maxPrice'dan katta bo'lmasligi kerak",
+        });
+      }
+    }
+
+    const products = await Product.find(filter);
 
     return res.status(200).json(products);
   } catch (err) {
@@ -66,9 +116,17 @@ export async function getProduct(req, res) {
 // PATCH
 export async function updateProduct(req, res) {
   try {
+    const updateData = {
+      ...req.body,
+    };
+
+    if (req.file) {
+      updateData.image = `/uploads/products/${req.file.filename}`;
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       {
         new: true,
         runValidators: true,

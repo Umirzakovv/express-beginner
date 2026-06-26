@@ -14,9 +14,23 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/ProductInput"
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: Telefon
+                price:
+                  type: number
+                  example: 250
+                description:
+                  type: string
+                  example: Test mahsulot
+                image:
+                  type: string
+                  format: binary
       responses:
         "201":
           description: Product yaratildi
@@ -35,6 +49,28 @@ paths:
       tags: [Products]
       security:
         - bearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Product nomi bo'yicha qisman qidiruv
+          schema:
+            type: string
+          example: telefon
+        - name: minPrice
+          in: query
+          required: false
+          description: Minimal narx
+          schema:
+            type: number
+          example: 100
+        - name: maxPrice
+          in: query
+          required: false
+          description: Maksimal narx
+          schema:
+            type: number
+          example: 500
       responses:
         "200":
           description: Productlar ro'yxati
@@ -44,6 +80,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "500":
@@ -91,9 +129,22 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/ProductInput"
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Telefon Pro
+                price:
+                  type: number
+                  example: 300
+                description:
+                  type: string
+                  example: Yangilangan tavsif
+                image:
+                  type: string
+                  format: binary
       responses:
         "200":
           description: Product yangilandi
@@ -187,11 +238,11 @@ paths:
                 email:
                   type: string
                   format: email
-                  example: user@example.com
+                  example: test@gmail.com
                 password:
                   type: string
                   format: password
-                  example: password123
+                  example: 12345
       responses:
         "200":
           description: Login muvaffaqiyatli bajarildi
@@ -269,6 +320,9 @@ components:
             _id:
               type: string
               example: 67f1079da3e10b14be4e6c1d
+            image:
+              type: string
+              example: /uploads/products/1710000000000-123456789.webp
   responses:
     BadRequest:
       description: Noto'g'ri ma'lumot yuborildi

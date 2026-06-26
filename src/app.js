@@ -7,6 +7,7 @@ import swaggerSpec from "./config/swagger.js";
 const app = express();
 
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 app.use("/auth", authRoutes);
 app.use("/v1", productRoutes);
