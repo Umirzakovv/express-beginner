@@ -74,3 +74,10 @@ export async function login(req, res) {
     });
   }
 }
+
+// GET ME
+export async function getMe(req, res) {
+  res.json({
+    user: req.user,
+  });
+}
