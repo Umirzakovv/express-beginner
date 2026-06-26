@@ -1,0 +1,141 @@
+paths:
+  /v1/product:
+    post:
+      summary: Yangi product yaratish
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Product yaratildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    get:
+      summary: Barcha productlarni olish
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Productlar ro'yxati
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /v1/product/{id}:
+    get:
+      summary: ID bo'yicha bitta productni olish
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product MongoDB IDsi
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product topildi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Product topilmadi
+        "500":
+          $ref: "#/components/responses/ServerError"
+    patch:
+      summary: Productni yangilash
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product MongoDB IDsi
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "200":
+          description: Product yangilandi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Product topilmadi
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ProductInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: Telefon
+        price:
+          type: number
+          example: 250
+        description:
+          type: string
+          example: Test mahsulot
+    Product:
+      allOf:
+        - $ref: "#/components/schemas/ProductInput"
+        - type: object
+          properties:
+            _id:
+              type: string
+              example: 67f1079da3e10b14be4e6c1d
+  responses:
+    BadRequest:
+      description: Noto'g'ri ma'lumot yuborildi
+    Unauthorized:
+      description: Token mavjud emas, noto'g'ri yoki yaroqsiz
+    ServerError:
+      description: Server xatosi
