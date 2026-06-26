@@ -97,7 +97,25 @@ export async function updateProduct(req, res) {
 
 // DELETE
 export async function deleteProduct(req, res) {
-  
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({
+        message: "Product topilmadi",
+      });
+    }
+
+    return res.status(204).send();
+  } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        message: "Product ID noto'g'ri formatda",
+      });
+    }
+
+    return res.status(500).json({
+      message: err.message,
+    });
+  }
 }
-
-

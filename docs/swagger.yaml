@@ -1,3 +1,9 @@
+tags:
+  - name: Auth
+    description: Ro'yxatdan o'tish, login va joriy foydalanuvchi API'lari
+  - name: Products
+    description: Productlarni boshqarish API'lari
+
 paths:
   /v1/product:
     post:
@@ -101,6 +107,137 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           description: Product topilmadi
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      summary: Productni o'chirish
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product MongoDB IDsi
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Product o'chirildi
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Product topilmadi
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /auth/register:
+    post:
+      summary: Yangi foydalanuvchi ro'yxatdan o'tkazish
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 6
+                  example: password123
+      responses:
+        "201":
+          description: Foydalanuvchi yaratildi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  email:
+                    type: string
+                    format: email
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Bu email bilan foydalanuvchi allaqachon mavjud
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /auth/login:
+    post:
+      summary: Tizimga kirish va JWT token olish
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+      responses:
+        "200":
+          description: Login muvaffaqiyatli bajarildi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Bearer JWT token
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Email yoki parol noto'g'ri
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /auth/me:
+    get:
+      summary: Joriy foydalanuvchi ma'lumotlarini olish
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Foydalanuvchi ma'lumotlari
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      email:
+                        type: string
+                        format: email
+                      role:
+                        type: string
+                        example: user
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Bu API uchun ruxsat yo'q
         "500":
           $ref: "#/components/responses/ServerError"
 
